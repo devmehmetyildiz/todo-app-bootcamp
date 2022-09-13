@@ -12,6 +12,7 @@ class App extends Component {
         <Switch>
           <Route  path="/Login" component={Login} />
           <Route path="/Home" component={Home} />
+          <Redirect to='/Login' />
         </Switch>
       </Suspense >
     );
