@@ -25,6 +25,10 @@ export const ACTION_TYPES = {
 }
 
 export const GetAllTodos = () => async dispatch => {
+    FetchData(dispatch)
+}
+
+async function FetchData(dispatch) {
     dispatch({ type: ACTION_TYPES.GET_ALLTODOS_INIT })
     await axios({
         method: `get`,
@@ -52,17 +56,18 @@ export const GetSelectedTodo = (ItemId) => async dispatch => {
 };
 
 export const AddTodo = (Item) => dispatch => {
-    dispatch({ type: ACTION_TYPES.CREATE_TODO_INIT })
+    dispatch({ type: ACTION_TYPES.ADD_TODO_INIT })
     axios({
         method: `post`,
         url: process.env.REACT_APP_BACKEND_URL,
         data: Item
     })
         .then(() => {
-            dispatch({ type: ACTION_TYPES.CREATE_TODO_SUCCESS })
+            dispatch({ type: ACTION_TYPES.ADD_TODO_SUCCESS })
+            FetchData(dispatch)
         })
         .catch(error => {
-            dispatch({ type: ACTION_TYPES.CREATE_TODO_ERROR, payload: error })
+            dispatch({ type: ACTION_TYPES.ADD_TODO_ERROR, payload: error })
         })
 }
 
@@ -75,7 +80,7 @@ export const UpdateTodo = (Item) => dispatch => {
     })
         .then(() => {
             dispatch({ type: ACTION_TYPES.EDIT_TODO_SUCCESS })
-            dispatch({ type: ACTION_TYPES.REMOVE_SELECTEDTODO })
+            FetchData(dispatch)
         })
         .catch(error => {
             dispatch({ type: ACTION_TYPES.EDIT_TODO_ERROR, payload: error })
@@ -91,6 +96,7 @@ export const DeleteTodo = (Item) => dispatch => {
     })
         .then(() => {
             dispatch({ type: ACTION_TYPES.DELETE_TODO_SUCCESS })
+            FetchData(dispatch)
         })
         .catch(error => {
             dispatch({ type: ACTION_TYPES.DELETE_TODO_ERROR, payload: error })

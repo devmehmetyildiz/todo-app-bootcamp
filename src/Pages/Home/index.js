@@ -1,20 +1,24 @@
 import { connect } from 'react-redux'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { GetAllTodos, GetSelectedTodo, ClearSelectedTodo, AddTodo, UpdateTodo, DeleteTodo } from "../../Redux/Actions/TodoActions"
 import "../../Assets/Css/Home.css"
+import { current } from '@reduxjs/toolkit'
+import Select from 'react-select'
 
 export function Index(props) {
+
   const InitialData = {
     id: 0,
     content: '',
     isCompleted: false
   }
+  const inputRef = useRef < HTMLInputElement > (null);
   const { Todos, GetAllTodos, GetSelectedTodo, ClearSelectedTodo, AddTodo, UpdateTodo, DeleteTodo } = props
   const [username, setUsername] = useState("")
   const [currentTodo, setcurrentTodo] = useState(InitialData)
   const [list, setList] = useState([])
   const [addOperation, setaddOperation] = useState(true)
-
+  const [selectedStatus, setselectedStatus] = useState({ value: 'false', label: 'Tamamlanmadı' })
   useEffect(() => {
     const storageduser = localStorage.getItem('username')
     if (storageduser) {
@@ -26,20 +30,43 @@ export function Index(props) {
 
   }, [])
 
-  const getSelectedtodo = {
 
+  const HandleSubmit = () => {
+    if (addOperation) {
+      AddTodo(currentTodo)
+    } else {
+      let data = currentTodo
+      data.isCompleted = selectedStatus.value
+      UpdateTodo(data)
+      setaddOperation(true)
+    }
+  }
+
+  const HandleUpdateStatus = (e) => {
+    const selectedtodo = Todos.list.find(item => item.id === e.target.id)
+    setaddOperation(false)
+    setcurrentTodo(current => ({ ...current, ...selectedtodo }))
   }
 
   const HandleonChange = (e) => {
     const item = currentTodo
     item.content = e.target.value
-    setcurrentTodo(item)
+    setcurrentTodo(current => ({ ...current, ...item }))
   }
 
-  const Clear = () => {
+  const HandleDelete = (e) => {
+    DeleteTodo(Todos.list.find(item => item.id === e.target.id))
+  }
+
+  const HandleClear = () => {
     setaddOperation(true)
     setcurrentTodo(InitialData)
   }
+
+  const options = [
+    { value: 'true', label: 'Tamamlandı' },
+    { value: 'false', label: 'Tamamlanmadı' }
+  ]
 
   return (
     <>
@@ -58,14 +85,19 @@ export function Index(props) {
             <div className='mt-10'>
               <form onSubmit={(e) => { e.preventDefault() }}>
                 <div className="form-group">
-                  <label >Yapılacak İş</label>
+                  <label >{addOperation ? "Yeni Bir Yapılacak İş Ekleme" : "Yapılacak İş Güncelleme ID : " + currentTodo.id}</label>
                   <input type="text" className="form-control" placeholder="Yapılacak İş"
-                    value={currentTodo.content} onChange={() => { }}
+                    value={currentTodo.content} onChange={HandleonChange}
                   />
-                  <small className="form-text text-muted">Lütfen yapılacak işi yazınız</small>
+                  {addOperation ? null :
+                    <>
+                      <label className='mt-2'> Durum </label>
+                      <Select options={options} value={selectedStatus} onChange={(e) => { setselectedStatus(e) }} />
+                    </>
+                  }
                 </div>
-                <button type="submit" className="btn btn-primary" onClick={() => { }}>{addOperation ? "Ekle" : "Güncelle"}</button>
-                <button className="btn btn-primary ml-5" onClick={() => { }}>Temizle</button>
+                <button type="submit" className="btn btn-primary" onClick={HandleSubmit}>{addOperation ? "Ekle" : "Güncelle"}</button>
+                <button className="btn btn-primary ml-5" onClick={HandleClear}>Temizle</button>
               </form>
             </div>
           </div>
@@ -76,24 +108,24 @@ export function Index(props) {
                   <th scope="col">ID</th>
                   <th scope="col">Yapılacak İş</th>
                   <th scope="col">Tamamlandımı</th>
-                  <th scope="col">Durumu Güncelle</th>
                   <th scope="col">Düzenle</th>
+                  <th scope="col">Sil</th>
                 </tr>
               </thead>
               <tbody>
                 {Todos.list.map(item => {
-                  return <tr>
+                  return <tr key={item.id}>
                     <th>{item.id}</th>
                     <td>{item.content}</td>
                     {item.isCompleted ? <td>Tamamlandı</td> : <td>Tamamlanmadı</td>}
                     <td>
-                      <div className="form-check">
-                        <input id={item.id} type="checkbox" onClick={() => { }} className="form-check-input" id="exampleCheck1" />
-                      </div>
+                      <button id={item.id} type="button" onClick={HandleUpdateStatus} className="btn btn-primary" >
+                        Düzenle
+                      </button>
                     </td>
                     <td>
-                      <button id={item.id} type="button" className="btn btn-primary" >
-                        Düzenle
+                      <button id={item.id} type="button" onClick={HandleDelete} className="btn btn-primary" >
+                        Sil
                       </button>
                     </td>
                   </tr>
