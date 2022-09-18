@@ -63,6 +63,11 @@ export function Index(props) {
     setcurrentTodo(InitialData)
   }
 
+  const HandleLogout = () => {
+    localStorage.removeItem("username")
+    props.history.push('/Login')
+  }
+
   const options = [
     { value: 'true', label: 'Tamamlandı' },
     { value: 'false', label: 'Tamamlanmadı' }
@@ -76,11 +81,11 @@ export function Index(props) {
           <h5 className='ml-2'>{username}</h5>
         </a>
         <div className='navbar-text'>
-          <button className="btn btn-secondary Home__Logout_Btn">Çıkış Yap</button>
+          <button onClick={HandleLogout} className="btn btn-secondary Home__Logout_Btn">Çıkış Yap</button>
         </div>
       </nav>
       <div className='container align-items-center'>
-        <div className='row'>
+        <div className='row mt-5'>
           <div className='col-3'>
             <div className='mt-10'>
               <form onSubmit={(e) => { e.preventDefault() }}>
@@ -102,7 +107,7 @@ export function Index(props) {
             </div>
           </div>
           <div className='col-9'>
-            <table className="table table-dark">
+            <table className="table table-bordered table-hover">
               <thead>
                 <tr>
                   <th scope="col">ID</th>
